@@ -1,33 +1,66 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Package, Image as ImageIcon } from 'lucide-react';
-import { mockProducts } from '../../data/mockData';
-import { Product } from '../../types';
+import React, { useState } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Package,
+  Image as ImageIcon,
+} from "lucide-react";
+import { mockProducts } from "../../data/mockData";
+import { Product } from "../../types";
 
 interface ProductManagementProps {
   onNavigate: (page: string) => void;
 }
 
-const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => {
-  const [products] = useState<Product[]>(mockProducts);
+const ProductManagement: React.FC<ProductManagementProps> = ({
+  onNavigate,
+}) => {
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const ProductForm = ({ product, onClose }: { product?: Product; onClose: () => void }) => {
+  const ProductForm = ({
+    product,
+    onClose,
+    onSubmit,
+  }: {
+    product?: Product;
+    onClose: () => void;
+    onSubmit: (product: Product) => void;
+  }) => {
     const [formData, setFormData] = useState({
-      name: product?.name || '',
-      description: product?.description || '',
+      name: product?.name || "",
+      description: product?.description || "",
       price: product?.price || 0,
-      unit: product?.unit || 'lb',
-      category: product?.category || 'Vegetables',
+      unit: product?.unit || "lb",
+      category: product?.category || "Vegetables",
       quantity: product?.quantity || 0,
       organic: product?.organic || false,
-      images: product?.images || ['']
+      images: product?.images || [""],
     });
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       // Handle form submission
-      console.log('Product data:', formData);
+      // console.log("Product data:", formData);
+
+      const finalProduct = product
+        ? { ...product, ...formData }
+        : {
+            ...formData,
+            id: Date.now().toString(),
+            rating: 0,
+            reviewCount: 0,
+            inStock: formData.quantity > 0,
+            farmerId: "demo",
+            farmerName: "Demo Farmer",
+            harvestDate: new Date().toISOString().split("T")[0],
+            location: "Unknown",
+          };
+
+      onSubmit(finalProduct);
       onClose();
     };
 
@@ -36,28 +69,36 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
         <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6 border-b border-gray-100">
             <h2 className="text-xl font-semibold text-gray-900">
-              {product ? 'Edit Product' : 'Add New Product'}
+              {product ? "Edit Product" : "Add New Product"}
             </h2>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   required
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category
+                </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="Vegetables">Vegetables</option>
@@ -70,10 +111,14 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
@@ -82,22 +127,33 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      price: parseFloat(e.target.value),
+                    })
+                  }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   required
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unit
+                </label>
                 <select
                   value={formData.unit}
-                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, unit: e.target.value })
+                  }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="lb">per lb</option>
@@ -107,13 +163,20 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
                   <option value="dozen">per dozen</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity Available</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity Available
+                </label>
                 <input
                   type="number"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      quantity: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   required
                 />
@@ -125,7 +188,9 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
                 type="checkbox"
                 id="organic"
                 checked={formData.organic}
-                onChange={(e) => setFormData({ ...formData, organic: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, organic: e.target.checked })
+                }
                 className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
               />
               <label htmlFor="organic" className="ml-2 text-sm text-gray-700">
@@ -134,11 +199,15 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Product Image URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product Image URL
+              </label>
               <input
                 type="url"
                 value={formData.images[0]}
-                onChange={(e) => setFormData({ ...formData, images: [e.target.value] })}
+                onChange={(e) =>
+                  setFormData({ ...formData, images: [e.target.value] })
+                }
                 placeholder="https://..."
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
@@ -156,7 +225,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
                 type="submit"
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                {product ? 'Update Product' : 'Add Product'}
+                {product ? "Update Product" : "Add Product"}
               </button>
             </div>
           </form>
@@ -171,8 +240,12 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Product Management</h1>
-            <p className="text-gray-600">Manage your product listings and inventory</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Product Management
+            </h1>
+            <p className="text-gray-600">
+              Manage your product listings and inventory
+            </p>
           </div>
           <button
             onClick={() => setShowAddForm(true)}
@@ -188,7 +261,9 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
           <div className="bg-white p-6 rounded-xl border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <Package className="w-8 h-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">{products.length}</span>
+              <span className="text-2xl font-bold text-gray-900">
+                {products.length}
+              </span>
             </div>
             <p className="text-sm font-medium text-gray-600">Total Products</p>
           </div>
@@ -197,7 +272,9 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                 <span className="text-green-600 font-bold text-sm">✓</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">{products.filter(p => p.inStock).length}</span>
+              <span className="text-2xl font-bold text-gray-900">
+                {products.filter((p) => p.inStock).length}
+              </span>
             </div>
             <p className="text-sm font-medium text-gray-600">In Stock</p>
           </div>
@@ -206,7 +283,9 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                 <span className="text-red-600 font-bold text-sm">!</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">{products.filter(p => p.quantity < 10).length}</span>
+              <span className="text-2xl font-bold text-gray-900">
+                {products.filter((p) => p.quantity < 10).length}
+              </span>
             </div>
             <p className="text-sm font-medium text-gray-600">Low Stock</p>
           </div>
@@ -224,23 +303,40 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
         {/* Products Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Your Products</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Your Products
+            </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Product</th>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Category</th>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Price</th>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Stock</th>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Rating</th>
-                  <th className="text-left px-6 py-4 font-medium text-gray-500">Actions</th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Product
+                  </th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Category
+                  </th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Price
+                  </th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Stock
+                  </th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Rating
+                  </th>
+                  <th className="text-left px-6 py-4 font-medium text-gray-500">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <tr
+                    key={product.id}
+                    className="border-b border-gray-50 hover:bg-gray-50"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <img
@@ -249,21 +345,31 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
                           className="w-12 h-12 rounded-lg object-cover"
                         />
                         <div>
-                          <p className="font-medium text-gray-900">{product.name}</p>
-                          <p className="text-sm text-gray-500">{product.unit}</p>
+                          <p className="font-medium text-gray-900">
+                            {product.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {product.unit}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{product.category}</td>
-                    <td className="px-6 py-4 font-semibold text-gray-900">${product.price}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {product.category}
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">
+                      ${product.price}
+                    </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        product.quantity > 20 
-                          ? 'bg-green-100 text-green-800'
-                          : product.quantity > 0
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.quantity > 20
+                            ? "bg-green-100 text-green-800"
+                            : product.quantity > 0
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {product.quantity} {product.unit}
                       </span>
                     </td>
@@ -298,14 +404,27 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onNavigate }) => 
 
         {/* Add Product Form Modal */}
         {showAddForm && (
-          <ProductForm onClose={() => setShowAddForm(false)} />
+          <ProductForm
+            onClose={() => setShowAddForm(false)}
+            onSubmit={(newProduct) => {
+              setProducts((prev) => [...prev, newProduct]);
+            }}
+          />
         )}
 
         {/* Edit Product Form Modal */}
         {editingProduct && (
-          <ProductForm 
-            product={editingProduct} 
-            onClose={() => setEditingProduct(null)} 
+          <ProductForm
+            product={editingProduct}
+            onClose={() => setEditingProduct(null)}
+            onSubmit={(updatedProduct) => {
+              setProducts((prev) =>
+                prev.map((p) =>
+                  p.id === updatedProduct.id ? updatedProduct : p
+                )
+              );
+              setEditingProduct(null);
+            }}
           />
         )}
       </div>
