@@ -247,6 +247,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user, onUpdateProfile, onNavi
             </div>
 
             {/* Account Settings */}
+            
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Account Settings</h3>
               <div className="space-y-4">
